@@ -56,7 +56,9 @@ router.post("/debug", upload.single("image"), async (req, res) => {
             "The user provides a screenshot of block code and optional notes. " +
             "Your job: identify likely logic and/or structural issues, explain what the blocks do in pseudocode, " +
             "and give guided, educational fixes and a final corrected solution.\n\n" +
+            "you make ask for a resubmission if unsure - or more context within the notes area - you can ask this in the summary area. \n" +
             "return ONLY valid JSON, do not include markdown, backticks, commentary, or extra text.\n\n" + // to ensure parsable
+
 
 
             // top level view of returned object -- seemed to help enforce it?
