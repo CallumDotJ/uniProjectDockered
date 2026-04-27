@@ -58,9 +58,6 @@ router.post("/debug", upload.single("image"), async (req, res) => {
             "and give guided, educational fixes and a final corrected solution.\n\n" +
             "you make ask for a resubmission if unsure - or more context within the notes area - you can ask this in the summary area. \n" +
             "return ONLY valid JSON, do not include markdown, backticks, commentary, or extra text.\n\n" + // to ensure parsable
-
-
-
             // top level view of returned object -- seemed to help enforce it?
             "Output must be ONLY a single JSON object with exactly these top-level keys:\n" +
             "- summary\n" +
@@ -70,8 +67,6 @@ router.post("/debug", upload.single("image"), async (req, res) => {
             "- pseudocodeLocation\n" +
             "- hints\n" +
             "- officialAnswer\n\n" +
-
-
             /* RULES FOR THE AI API*/
 
             "rules:\n" +
@@ -100,8 +95,6 @@ router.post("/debug", upload.single("image"), async (req, res) => {
                 "- pseudocodeLocation: object {currentBehaviorPseudocode, whereItGoesWrong, correctedLogicPseudocode}.Ensure to keep indentation correct in the pseudocode\n" + // to be removed - psuedo
                 "- hints: array of 3 objects {level, hint} where level is 1,2,3.\n" + // 3 hints - tiered structure
                 "- officialAnswer: object {finalPseudocode, blockFixSteps, commonMistakesToAvoid[ARRAY]}.\n" + // Fully fixed solution
-                
-                
                 /* UI OBJECT MATERIAL */
 
                 "- issueLocation: object { blockPath, blocks, problemBlockId, confidence, notes }.\n" + // top level obj
@@ -127,13 +120,16 @@ router.post("/debug", upload.single("image"), async (req, res) => {
 
     let parsed = null;
 
-    try { // try convert
+    try {
+      // try convert
       parsed = JSON.parse(cleaned);
     } catch (err1) {
-      try { // TRY REPAIR using jsonrepair
+      try {
+        // TRY REPAIR using jsonrepair
         const repaired = jsonrepair(cleaned);
         parsed = JSON.parse(repaired);
-      } catch (err2) { // failure to repair 
+      } catch (err2) {
+        // failure to repair
         console.error("Failed to parse or repair JSON from model output", {
           raw,
           cleaned,
@@ -147,7 +143,6 @@ router.post("/debug", upload.single("image"), async (req, res) => {
     }
 
     return res.json({ output: parsed }); // MAIN HAPPY RETURN
-
   } catch (err) {
     // top-level error
     console.error("OpenAI Error", err);
@@ -160,7 +155,6 @@ router.post("/debug", upload.single("image"), async (req, res) => {
   }
 });
 
-
 // DEPREC
 // Was used to generate undetsanding of the API
 router.post("/chat", async (req, res) => {
@@ -168,11 +162,9 @@ router.post("/chat", async (req, res) => {
   try {
     const { messages } = req.body;
     if (!messages || !Array.isArray(messages)) {
-      return res
-        .status(400)
-        .json({
-          error: "invalid messages formaat, expected an array of messages",
-        });
+      return res.status(400).json({
+        error: "invalid messages formaat, expected an array of messages",
+      });
     }
     const response = await client.chat.completions.create({
       model: "gpt-4o", // least to give image understanding
@@ -185,18 +177,15 @@ router.post("/chat", async (req, res) => {
   }
 });
 
-
 // Created to extract learning issues from the users past conversation messages.
 router.post("/learn", async (req, res) => {
   // extract issues for learning purposes
   try {
     const { messages } = req.body;
     if (!messages || !Array.isArray(messages)) {
-      return res
-        .status(400)
-        .json({
-          error: "Invalid messages format, expected an array of messages",
-        });
+      return res.status(400).json({
+        error: "Invalid messages format, expected an array of messages",
+      });
     }
 
     const response = await client.chat.completions.create({
@@ -206,7 +195,7 @@ router.post("/learn", async (req, res) => {
         {
           role: "system",
           content:
-            "You are an educational assistant that's job is to find the specific weak area of a student based on a problem they have had resolved." + 
+            "You are an educational assistant that's job is to find the specific weak area of a student based on a problem they have had resolved." +
             "You will be given a conversation between a student and a tutor. The student has had a problem resolved, but its your job to identify what specific concept or skill the student is struggling with." +
             "Based on the conversation, identify the most likely weak area of the student and return it in a single sentence. Be specific and focus on one main issue, not multiple." +
             "Return only the weak area in a single sentence, do not include any other text or explanation." +
